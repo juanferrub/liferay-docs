@@ -15,7 +15,22 @@ As with portlets, layout templates, and themes, hooks are created and managed us
 
 ## Creating a Hook [](id=creating-a-ho-4)
 
-Hooks are stored within the `hooks` directory of the Plugins SDK. Navigate to this directory in a terminal and enter the following command to create a new hook (Linux and Mac OS X):
+Hooks are stored within the `hooks` directory of the Plugins SDK. We will demonstrate two methods that can be used to create your hooks.
+
+***Using Developer Studio:*** Go to File &rarr; New &rarr; Liferay Project
+
+Next, go through the following steps to setup your new hook:
+
+1. Enter *example* for your Project name and *Example* for your Display name
+2. Select the Plugins SDK and Portal Runtime that you've configured
+3. Select the *Hook* Plugin Type
+4. Click *Finish*
+
+![Figure 6.1: Creating your hook plugin](../../images/06-hooks-1.png)
+
+Notice the Plugins SDK automatically adds "hook" to the project name after its creation. When creating a new plugin in Developer Studio, we can either create a completely new plugin or add a new plugin to an existing plugin project.
+
+***Using the terminal:*** Navigate to your Plugins SDK directory in a terminal and enter the following command to create a new hook (Linux and Mac OS X):
 
     ./create.sh example "Example"
 
@@ -27,11 +42,44 @@ You should get a BUILD SUCCESSFUL message from Ant, and there will now be a new 
 
 ### Deploying the Hook [](id=lp-6-1-dgen05-deploying-the-hook-0)
 
-Open a terminal window in your `hooks/example-hook` directory and enter this command:
+***Using Developer Studio:*** Simply drag your hook project onto your server.
+
+![Figure 6.2: Deploying your hook plugin](../../images/06-hooks-4.png)
+
+Upon deploying your hook, your server will output messages indicating your hook was read, registered and is now available for use.
+
+	Reading plugin package for example-hook
+	Registering hook for example-hook
+	Hook for example-hook is available for use
+
+If at any time you need to redeploy this plugin while in Developer Studio, right click your plugin's icon located underneath your server and select *Redeploy*.
+
+![Figure 6.3: Redeploying your hook plugin](../../images/06-hooks-2.png)
+
+Unlike our previous portlets and themes examples, the hook plugin does not do anything yet. After a few edits and file additions, you will have a fully functional hook plugin!
+
+***Using the terminal:*** Open a terminal window in your `hooks/example-hook` directory and enter this command:
 
     ant deploy
 
 You should get a BUILD SUCCESSFUL message, which means that your hook is now being deployed. If you switch to the terminal window running Liferay, and wait for a few seconds, you should see the message "Hook for example-hook is available for use." However, unlike portlets or themes, your new hook doesn't actually do anything yet.
+
+### Anatomy of the Hook [](id=lp-6-1-dgen06-anatomy-of-the-hook-0)
+
+In order to create a useful hook, we will need to edit existing files and create new files within the structure. The full structure of the example-hook is shown below:
+
+-	example-hook/
+	-	docroot/
+		-	META-INF/
+		-	WEB-INF/
+			-	lib
+			-	liferay-hook.xml
+			-	liferay-plugin-package.properties
+	-	build.xml
+	
+In Developer Studio, the hook structure can be viewed in the *Package Explorer* as shown below:
+
+![Figure 6.4: Package Explorer view of hook plugin](../../images/06-hooks-3.png)
 
 ## Overriding a JSP [](id=overriding-a-j-4)
 
@@ -47,7 +95,7 @@ Now, if you look inside the `liferay-portal-[version]/tomcat-[tomcat-version]/we
 
 ## Customizing JSPs without overriding the original [](id=customizing-jsps-without-overriding-the-origin-1)
 
-The drawback of overridding a JSP is that if the original changes (for example to fix a bug) then you have to also change your customized file in order to benefit from the change to the original.
+The drawback of overriding a JSP is that if the original changes (for example to fix a bug) then you have to also change your customized file in order to benefit from the change to the original.
 
 If you wish to avoid this drawback and make your JSP modifications less invasive, you can render the original JSP into a string, and then modify it dynamically afterwards. This makes it possible to change minor elements of a JSP, such as adding a new heading or button, without needing to worry about modifying your hook every time you upgrade Liferay. Here is an example that customizes the search portlet removing the ability to a search provider in the browser:
 
@@ -93,13 +141,13 @@ Finally, edit `liferay-hook.xml` inside `example-hook/docroot/WEB-INF` and add t
 
 Deploy your hook again and wait for deployment to complete. Then log out and back in, and you should see your custom message, *## My custom login action*, output to the terminal window running Liferay.
 
-There are several other events for which you can define custom actions using hooks. Some of these actions must extend `com.liferay.portal.kernel.events.Action`, while others must extend `com.liferay.portal.struts.SimpleAction`. Importantly, to ensure better forward compatibility, it is recommended to use hooks rather than Ext plugins for customizing struts actions. For more information on these events, see the [Configuring Liferay's Properties](http://www.liferay.com/documentation/liferay-portal/6.1/user-guide/-/ai/configuring-liferay-s-properties) section of [Using Liferay Portal 6.1](http://www.liferay.com/documentation/liferay-portal/6.1/user-guide) or lookup the actual `portal.properties` configuration file for your version of Liferay in the  [Portal Properties](http://www.liferay.com/community/wiki/-/wiki/Main/Portal+Properties) wiki page.
+There are several other events for which you can define custom actions using hooks. Some of these actions must extend `com.liferay.portal.kernel.events.Action`, while others must extend `com.liferay.portal.struts.SimpleAction`. Importantly, to ensure better forward compatibility, it is recommended to use hooks rather than Ext plugins for customizing struts actions. For more information on these events, see the [Properties Reference](http://www.liferay.com/documentation/liferay-portal/6.1/user-guide/-/ai/configuring-liferay-s-properti-1) chapter of *Using Liferay Portal* or lookup the actual `portal.properties` configuration file for your version of Liferay in the  [Portal Properties](http://www.liferay.com/community/wiki/-/wiki/Main/Portal+Properties) wiki page.
 
 You've learned how to perform a custom action by extending a portal action. So, as you might have expected, it is just as easy to extend or override portal properties. Let's take a look!
 
 ## Extending and Overriding *portal.properties* [](id=extending-and-overriding-<em>portal-properties<-e-1)
 
-In our hook, we modified the `login.events.pre` portal property. Since this property accepts a list of values, our value was appended to the existing  `login.events.pre` values of the `portal.properties` file. From multiple hooks, it is safe to modify portal properties that take *multiple* values. But, some portal properties only accept a *single* value, such as the `terms.of.use.required` property which can be either `true` or `false`. Properties that only accept a single value should only be modifified from one hook; otherwise Liferay does not know which value to use. You can look up properties in the [Configuring Liferay's Properties](http://www.liferay.com/documentation/liferay-portal/6.1/user-guide/-/ai/configuring-liferay-s-properties) section of [Using Liferay Portal 6.1](http://www.liferay.com/documentation/liferay-portal/6.1/user-guide) or in the `portal.properties` file to determine a property's type.
+In our hook, we modified the `login.events.pre` portal property. Since this property accepts a list of values, our value was appended to the existing  `login.events.pre` values of the `portal.properties` file. From multiple hooks, it is safe to modify portal properties that take *multiple* values. But, some portal properties only accept a *single* value, such as the `terms.of.use.required` property which can be either `true` or `false`. Properties that only accept a single value should only be modifified from one hook; otherwise Liferay does not know which value to use. You can look up properties in the [Properties Reference](http://www.liferay.com/documentation/liferay-portal/6.1/user-guide/-/ai/configuring-liferay-s-properti-1) chapter of *Using Liferay Portal* or in the `portal.properties` file to determine a property's type.
 
 Not all portal properties can be overridden in a hook. A complete list of the available properties can be found in the `liferay-hook-[liferay version].dtd` in the `definitions` folder of the Liferay source code. In addition to defining custom actions, hooks can also override portal properties to define model listeners, validators, generators, and content sanitizers. Next, let's see how you can override a portal service with a hook.
 
@@ -137,7 +185,7 @@ First, inside `example-hook/docroot/WEB-INF/src/com/liferay/sample/hook` create 
 
 ---
 
-![tip](../../images/tip-pen-paper.png)**Note:** the wrapper class (`MyUserLocalServiceImpl` in this example) will be loaded in the hook's class loader. That means that it will have access to any other class included within the same WAR file; but it *won't* have access to *internal* classes of Liferay.
+ ![tip](../../images/tip-pen-paper.png)**Note:** the wrapper class (`MyUserLocalServiceImpl` in this example) will be loaded in the hook's class loader. That means that it will have access to any other class included within the same WAR file; but it *won't* have access to *internal* classes of Liferay.
 
 ---
 
@@ -162,7 +210,7 @@ For a complete list of the services available and the methods of each of them ch
 
 ## Overriding a *Language.properties* File [](id=overriding-a-<em>language-properties<-em>-fi-1)
 
-In addition to the capabilities of hooks already discussed thus far, you can also override a `Language.properties` files from a hook, allowing you to change any of the messages displayed by Liferay to suit your needs. The process is extremely similar to the ones we have just described. All you need to do is create a *Language* file for the language whose messages you want to customize and then refer to it from your `liferay-hook.xml`. For example, to override the Spanish and French message translations, create *Language* files of the same name and similar path in your hook project and refer to them in your `liferay-hook.xml` file as in the following:
+In addition to the capabilities of hooks already discussed thus far, you can also override a `Language.properties` file from a hook, allowing you to change any of the messages displayed by Liferay to suit your needs. The process is extremely similar to the ones we have just described. All you need to do is create a *Language* file for the language whose messages you want to customize and then refer to it from your `liferay-hook.xml`. For example, to override the Spanish and French message translations, create *Language* files of the same name and similar path in your hook project and refer to them in your `liferay-hook.xml` file as in the following:
 
     <hook>
 		...
@@ -173,7 +221,7 @@ In addition to the capabilities of hooks already discussed thus far, you can als
 
 ---
 
-![tip](../../images/tip-pen-paper.png)**Tip:** as always, please check the DTD of each Liferay XML file you modify for the elements and attributes that can be included in the XML and the specified order for those elements.
+ ![tip](../../images/tip-pen-paper.png)**Tip:** As always, please check the DTD of each Liferay XML file you modify for the elements and attributes that can be included in the XML and the specified order for those elements.
 
 ---
 
