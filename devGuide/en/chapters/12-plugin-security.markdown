@@ -1,4 +1,3 @@
-
 # Plugin Security Management [](id=lp-6-1-dgen11-plugin-security-management-0)
 
 We all wish cyberspace were free of malicious software and unwanted bugs. Since
@@ -9,7 +8,7 @@ tights, except, well, it's not.
 In its quest for peace within your portal, the Plugin Security Manager pledges
 to:
 
-- Protect your portal and host system from unwanted side affects and malicious
+- Protect your portal and host system from unwanted side effects and malicious
 software introduced by plugins.
 - Control plugin access to your portal, host system, and network by requiring
 that plugins specify ahead of time the portal resources they intend to access.
